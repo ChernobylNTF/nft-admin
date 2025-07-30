@@ -163,8 +163,7 @@
             allButtons.forEach(btn => btn.disabled = disabled);
         }
     }
-
-    // --- LÓGICA WEB3 ---
+       // --- LÓGICA WEB3 ---
     async function connectWallet() {
       // 1. Comprobar si el ABI está presente. Es el error más común.
       if (miningNftABI.length === 0) {
@@ -236,4 +235,53 @@
         log(`✅ ¡Éxito! Confirmada: <a href="${explorerUrl}" target="_blank" class="text-blue-400 hover:underline">${receipt.transactionHash}</a>`);
 
       } catch (e) {
-        const errorMessage = e.reason || e.data?.message || e.message || "Erro
+        const errorMessage = e.reason || e.data?.message || e.message || "Error desconocido.";
+        log(`❌ Error en la transacción: ${errorMessage}`, true);
+      } finally {
+        button.innerHTML = originalButtonText;
+        setButtonsDisabled(false, buttonId);
+        allButtons.forEach(btn => btn.disabled = false);
+      }
+    }
+
+    // --- EVENT LISTENERS ---
+    connectBtn.addEventListener('click', connectWallet);
+
+    if (window.ethereum) {
+        window.ethereum.on('accountsChanged', (accounts) => {
+            log('🔄 Cambio de cuenta detectado. Recargando la página...');
+            location.reload();
+        });
+        window.ethereum.on('chainChanged', (chainId) => {
+            log('🔄 Cambio de red detectado. Recargando la página...');
+            location.reload();
+        });
+    }
+
+    document.getElementById('setBaseURI-btn').addEventListener('click', () => {
+      const uri = document.getElementById('baseURI-input').value;
+      if (!uri) return log('❌ Error: La Base URI no puede estar vacía.', true);
+      handleTransaction('setBaseURI-btn', 'setBaseURI', [uri], 'Configurando Base URI');
+    });
+
+    document.getElementById('setRarityInfo-btn').addEventListener('click', () => {
+      const rarity = parseInt(document.getElementById('rarity-select').value);
+      const power = document.getElementById('power-input').value;
+      const folder = document.getElementById('folder-input').value;
+      if (!power || !folder) return log('❌ Error: Poder y Carpeta son requeridos.', true);
+      handleTransaction('setRarityInfo-btn', 'setRarityInfo', [rarity, ethers.BigNumber.from(power), folder], `Configurando Rareza ${rarity}`);
+    });
+
+    document.getElementById('setModelStats-btn').addEventListener('click', () => {
+      const rarity = parseInt(document.getElementById('stats-rarity-select').value);
+      const modelId = document.getElementById('modelId-input').value;
+      const attack = document.getElementById('attack-input').value;
+      const defense = document.getElementById('defense-input').value;
+      if (!modelId || !attack || !defense) return log('❌ Error: Todos los campos de stats son requeridos.', true);
+      handleTransaction('setModelStats-btn', 'setModelStats', [rarity, modelId, attack, defense], `Configurando Stats para Modelo ${modelId}`);
+    });
+  </script>
+</body>
+</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+
+    
