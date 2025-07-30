@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel - Destinity World (con Viem)</title>
+  <title>Admin Panel - Destinity World (Carga Inteligente)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- CAMBIO: Se reemplaza Ethers.js por Viem, una librería más moderna y ligera -->
   <script src="https://unpkg.com/viem/dist/viem.iife.js" defer></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -117,6 +116,7 @@
   </div>
 
   <script>
+    // Se envuelve todo en un listener para asegurar que el HTML base esté listo.
     document.addEventListener('DOMContentLoaded', () => {
       // --- CONFIGURACIÓN DEL CONTRATO ---
       const NFT_CONTRACT_ADDRESS = '0x753c98de93F536611bfF03E8381A8A24D8FFE1b5';
@@ -164,19 +164,6 @@
       }
       // --- LÓGICA WEB3 (VIEM) ---
       async function connectWallet() {
-        if (typeof window.viem === 'undefined') {
-            log('❌ Error: La librería Viem no está disponible. Por favor, recarga la página.', true);
-            connectionCard.classList.add('animate-shake');
-            setTimeout(()=> connectionCard.classList.remove('animate-shake'), 820);
-            return;
-        }
-        if (typeof window.ethereum === 'undefined') {
-          log('❌ Error: No se detecta una billetera Web3 (como MetaMask).', true);
-          connectionCard.classList.add('animate-shake');
-          setTimeout(()=> connectionCard.classList.remove('animate-shake'), 820);
-          return;
-        }
-
         try {
           walletClient = viem.createWalletClient({ transport: viem.custom(window.ethereum) });
           publicClient = viem.createPublicClient({ transport: viem.custom(window.ethereum) });
@@ -251,56 +238,77 @@
         }
       }
       
-      // --- INICIALIZACIÓN ---
-      log("Panel inicializado. Verificando dependencias...");
-      if (typeof window.viem !== 'undefined') {
-        log("✅ Librería Viem.js detectada.");
-      } else {
-        log("⚠️ La librería Viem.js aún no se ha cargado. El botón de conexión esperará.", true);
+      // --- INICIALIZACIÓN INTELIGENTE ---
+      function initializeApp() {
+        let retries = 0;
+        const maxRetries = 25; // Intentar por 5 segundos (25 * 200ms)
+
+        function check() {
+            // Verificar si las librerías necesarias están listas
+            if (typeof window.viem !== 'undefined' && typeof window.ethereum !== 'undefined') {
+                log("✅ Dependencias listas. Panel operativo.");
+                setupEventListeners();
+            } else {
+                retries++;
+                if (retries < maxRetries) {
+                    // Si no están listas, volver a intentar en 200ms
+                    setTimeout(check, 200);
+                } else {
+                    // Si se superan los reintentos, mostrar un error final
+                    log("❌ Error crítico: No se pudieron cargar las dependencias (Viem o MetaMask) después de 5 segundos. Por favor, verifica tu conexión y recarga la página.", true);
+                    if (typeof window.viem === 'undefined') {
+                        log("Detalle: La librería Viem.js no se cargó.", true);
+                    }
+                    if (typeof window.ethereum === 'undefined') {
+                        log("Detalle: No se detectó una billetera (MetaMask).", true);
+                    }
+                }
+            }
+        }
+        check();
       }
-      if (typeof window.ethereum !== 'undefined') {
-        log("✅ Billetera Web3 (MetaMask) detectada.");
-      } else {
-        log("⚠️ No se detecta una billetera Web3 (MetaMask).", true);
+
+      function setupEventListeners() {
+        connectBtn.addEventListener('click', connectWallet);
+
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', () => {
+                log('🔄 Cambio de cuenta detectado. Recargando la página...');
+                location.reload();
+            });
+            window.ethereum.on('chainChanged', () => {
+                log('🔄 Cambio de red detectado. Recargando la página...');
+                location.reload();
+            });
+        }
+
+        document.getElementById('setBaseURI-btn').addEventListener('click', () => {
+          const uri = document.getElementById('baseURI-input').value;
+          if (!uri) return log('❌ Error: La Base URI no puede estar vacía.', true);
+          handleTransaction('setBaseURI-btn', 'setBaseURI', [uri], 'Configurando Base URI');
+        });
+
+        document.getElementById('setRarityInfo-btn').addEventListener('click', () => {
+          const rarity = parseInt(document.getElementById('rarity-select').value);
+          const power = document.getElementById('power-input').value;
+          const folder = document.getElementById('folder-input').value;
+          if (!power || !folder) return log('❌ Error: Poder y Carpeta son requeridos.', true);
+          handleTransaction('setRarityInfo-btn', 'setRarityInfo', [rarity, BigInt(power), folder], `Configurando Rareza ${rarity}`);
+        });
+
+        document.getElementById('setModelStats-btn').addEventListener('click', () => {
+          const rarity = parseInt(document.getElementById('stats-rarity-select').value);
+          const modelId = document.getElementById('modelId-input').value;
+          const attack = document.getElementById('attack-input').value;
+          const defense = document.getElementById('defense-input').value;
+          if (!modelId || !attack || !defense) return log('❌ Error: Todos los campos de stats son requeridos.', true);
+          handleTransaction('setModelStats-btn', 'setModelStats', [rarity, parseInt(modelId), parseInt(attack), parseInt(defense)], `Configurando Stats para Modelo ${modelId}`);
+        });
       }
 
-      // --- EVENT LISTENERS ---
-      connectBtn.addEventListener('click', connectWallet);
-
-      if (window.ethereum) {
-          window.ethereum.on('accountsChanged', (accounts) => {
-              log('🔄 Cambio de cuenta detectado. Recargando la página...');
-              location.reload();
-          });
-          window.ethereum.on('chainChanged', (chainId) => {
-              log('🔄 Cambio de red detectado. Recargando la página...');
-              location.reload();
-          });
-      }
-
-      document.getElementById('setBaseURI-btn').addEventListener('click', () => {
-        const uri = document.getElementById('baseURI-input').value;
-        if (!uri) return log('❌ Error: La Base URI no puede estar vacía.', true);
-        handleTransaction('setBaseURI-btn', 'setBaseURI', [uri], 'Configurando Base URI');
-      });
-
-      document.getElementById('setRarityInfo-btn').addEventListener('click', () => {
-        const rarity = parseInt(document.getElementById('rarity-select').value);
-        const power = document.getElementById('power-input').value;
-        const folder = document.getElementById('folder-input').value;
-        if (!power || !folder) return log('❌ Error: Poder y Carpeta son requeridos.', true);
-        // Viem usa BigInt para los tipos uint256
-        handleTransaction('setRarityInfo-btn', 'setRarityInfo', [rarity, BigInt(power), folder], `Configurando Rareza ${rarity}`);
-      });
-
-      document.getElementById('setModelStats-btn').addEventListener('click', () => {
-        const rarity = parseInt(document.getElementById('stats-rarity-select').value);
-        const modelId = document.getElementById('modelId-input').value;
-        const attack = document.getElementById('attack-input').value;
-        const defense = document.getElementById('defense-input').value;
-        if (!modelId || !attack || !defense) return log('❌ Error: Todos los campos de stats son requeridos.', true);
-        handleTransaction('setModelStats-btn', 'setModelStats', [rarity, parseInt(modelId), parseInt(attack), parseInt(defense)], `Configurando Stats para Modelo ${modelId}`);
-      });
+      // Iniciar la aplicación
+      log("Panel inicializado. Esperando dependencias...");
+      initializeApp();
     });
   </script>
 </body>
