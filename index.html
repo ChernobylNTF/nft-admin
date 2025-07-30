@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - Destinity World (Real)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    body { background-color: #0d1117; color: #e6edf3; font-family: 'Inter', sans-serif; }
+    .card { background-color: #161b22; border: 1px solid #30363d; }
+    .input { background-color: #0d1117; border: 1px solid #30363d; transition: all 0.2s ease-in-out; }
+    .input:focus { border-color: #2f81f7; box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.3); outline: none; }
+    .btn { background-color: #238636; transition: background-color 0.2s ease-in-out; }
+    .btn:hover { background-color: #2ea043; }
+    .btn-secondary { background-color: #21262d; }
+    .btn-secondary:hover { background-color: #30363d; }
+    .btn:disabled { background-color: #21262d; color: #8b949e; cursor: not-allowed; border: 1px solid #30363d;}
+    .loader {
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #3498db;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-8">
+  <div class="max-w-4xl mx-auto space-y-8">
+    <header class="text-center">
+      <h1 class="text-4xl font-bold text-yellow-400">Panel de Administrador</h1>
+      <p class="text-gray-400 mt-2">Gestiona tus contratos DWD y MiningNFT</p>
+    </header>
+
+    <!-- Conexión y Estado -->
+    <div class="card p-6 rounded-lg">
+      <h2 class="text-2xl font-semibold mb-4">Conexión</h2>
+      <button id="connect-wallet" class="btn w-full py-2 px-4 rounded-md font-bold">Conectar Billetera de Dueño</button>
+      <div id="wallet-status" class="mt-4 text-center text-sm space-y-1">
+        <p>Estado: <span id="status-text" class="font-mono text-red-500">Desconectado</span></p>
+        <p>Red: <span id="network-name" class="font-mono text-gray-400">N/A</span></p>
+        <p id="wallet-address" class="font-mono text-gray-400 truncate"></p>
+      </div>
+    </div>
+
+    <!-- Contrato MiningNFT -->
+    <div class="card p-6 rounded-lg space-y-6">
+      <h2 class="text-2xl font-semibold">Contrato MiningNFT</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- setBaseURI -->
+        <div>
+          <h3 class="font-bold mb-2">1. Establecer Base URI</h3>
+          <input id="baseURI-input" type="text" placeholder="ipfs://..." class="input w-full p-2 rounded-md">
+          <button id="setBaseURI-btn" class="btn w-full mt-2 py-2 px-4 rounded-md font-bold" disabled>Establecer URI</button>
+        </div>
+        <!-- setRarityInfo -->
+        <div>
+          <h3 class="font-bold mb-2">2. Configurar Rareza</h3>
+          <select id="rarity-select" class="input w-full p-2 rounded-md mb-2">
+            <option value="0">Common</option>
+            <option value="1">Uncommon</option>
+            <option value="2">Rare</option>
+            <option value="3">Epic</option>
+            <option value="4">Mythical</option>
+            <option value="5">Legendary</option>
+          </select>
+          <input id="power-input" type="number" placeholder="Poder de Minado (ej: 10)" class="input w-full p-2 rounded-md mb-2">
+          <input id="folder-input" type="text" placeholder="Nombre de Carpeta (ej: common)" class="input w-full p-2 rounded-md">
+          <button id="setRarityInfo-btn" class="btn w-full mt-2 py-2 px-4 rounded-md font-bold" disabled>Configurar Rareza</button>
+        </div>
+      </div>
+      <!-- setModelStats -->
+      <div>
+        <h3 class="font-bold mb-2">3. Configurar Estadísticas de Modelo</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <select id="stats-rarity-select" class="input p-2 rounded-md">
+            <option value="0">Common</option>
+            <option value="1">Uncommon</option>
+            <option value="2">Rare</option>
+            <option value="3">Epic</option>
+            <option value="4">Mythical</option>
+            <option value="5">Legendary</option>
+          </select>
+          <input id="modelId-input" type="number" placeholder="ID del Modelo (ej: 1)" class="input p-2 rounded-md">
+          <input id="attack-input" type="number" placeholder="Ataque (ej: 140)" class="input p-2 rounded-md">
+          <input id="defense-input" type="number" placeholder="Defensa (ej: 160)" class="input p-2 rounded-md">
+        </div>
+        <button id="setModelStats-btn" class="btn w-full mt-2 py-2 px-4 rounded-md font-bold" disabled>Configurar Stats</button>
+      </div>
+    </div>
+
+    <!-- Log de Transacciones -->
+    <div class="card p-6 rounded-lg">
+      <h2 class="text-2xl font-semibold mb-4">Log de Transacciones</h2>
+      <div id="tx-log" class="font-mono text-sm text-gray-400 h-40 overflow-y-auto bg-black/50 p-2 rounded-md">
+        Esperando acciones...
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- CONFIGURACIÓN DEL CONTRATO ---
+    const NFT_CONTRACT_ADDRESS = '0x753c98de93F536611bfF03E8381A8A24D8FFE1b5';
+    
+    // IMPORTANTE: PEGA AQUÍ EL ABI DE TU CONTRATO
+    // El ABI (Application Binary Interface) es un archivo JSON que describe cómo interactuar con tu contrato.
+    // Lo obtienes de tu entorno de desarrollo (Remix, Hardhat, Truffle) después de compilar.
+    const miningNftABI = [
+
+{
+
+	"inputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "constructor"
+
+},
+
+{
+
+	"anonymous": false,
+
+	"inputs": [
+
+		{
+
+			"indexed": true,
+
+			"internalType": "address",
+
+			"name": "owner",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"indexed": true,
+
+			"internalType": "address",
+
+			"name": "approved",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"indexed": true,
+
+			"internalType": "uint256",
+
+			"name": "tokenId",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"name": "Approval",
+
+	"type": "event"
+
+},
+
+{
+
+	"anonymous": false,
+
+	"inputs": [
+
+		{
+
+			"indexed": true,
+
+			"internalType": "address",
+
+			"name": "owner",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"indexed": true,
+
+			"internalType": "address",
+
+			"name": "operator",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"indexed": false,
+
+			"internalType": "bool",
+
+			"name": "approved",
+
+			"type": "bool"
+
+		}
+
+	],
+
+	"name": "ApprovalForAll",
+
+	"type": "event"
+
+},
+
+{
+
+	"anonymous": false,
+
+	"inputs": [
+
+		{
+
+			"indexed": true,
+
+			"internalType": "address",
+
+			"name": "previousOwner",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"indexed": true,
+
+			"internalType": "address",
+
+			"name": "newOwner",
+
+			"type": "address"
+
+		}
+
+	],
+
+	"name": "OwnershipTransferred",
+
+	"type": "event"
+
+},
+
+{
+
+	"anonymous": false,
+
+	"inputs": [
+
+		{
+
+			"indexed": true,
+
+			"internalType": "address",
+
+			"name": "from",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"indexed": true,
+
+			"internalType": "address",
+
+			"name": "to",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"indexed": true,
+
+			"internalType": "uint256",
+
+			"name": "tokenId",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"name": "Transfer",
+
+	"type": "event"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "to",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "tokenId",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"name": "approve",
+
+	"outputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "owner",
+
+			"type": "address"
+
+		}
+
+	],
+
+	"name": "balanceOf",
+
+	"outputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [],
+
+	"name": "baseURI",
+
+	"outputs": [
+
+		{
+
+			"internalType": "string",
+
+			"name": "",
+
+			"type": "string"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [],
+
+	"name": "claimFreeNFT",
+
+	"outputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "tokenId",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"name": "getApproved",
+
+	"outputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "",
+
+			"type": "address"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "user",
+
+			"type": "address"
+
+		}
+
+	],
+
+	"name": "getMiningPower",
+
+	"outputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "uint256[5]",
+
+			"name": "_tokenIds",
+
+			"type": "uint256[5]"
+
+		}
+
+	],
+
+	"name": "getTeamPower",
+
+	"outputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "totalAttack",
+
+			"type": "uint256"
+
+		},
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "totalDefense",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "",
+
+			"type": "address"
+
+		}
+
+	],
+
+	"name": "hasClaimedFreeNFT",
+
+	"outputs": [
+
+		{
+
+			"internalType": "bool",
+
+			"name": "",
+
+			"type": "bool"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "owner",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"internalType": "address",
+
+			"name": "operator",
+
+			"type": "address"
+
+		}
+
+	],
+
+	"name": "isApprovedForAll",
+
+	"outputs": [
+
+		{
+
+			"internalType": "bool",
+
+			"name": "",
+
+			"type": "bool"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "to",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"internalType": "enum MiningNFT.Rarity",
+
+			"name": "_rarity",
+
+			"type": "uint8"
+
+		},
+
+		{
+
+			"internalType": "uint16",
+
+			"name": "_modelId",
+
+			"type": "uint16"
+
+		}
+
+	],
+
+	"name": "mintNFT",
+
+	"outputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "enum MiningNFT.Rarity",
+
+			"name": "",
+
+			"type": "uint8"
+
+		},
+
+		{
+
+			"internalType": "uint16",
+
+			"name": "",
+
+			"type": "uint16"
+
+		}
+
+	],
+
+	"name": "modelStats",
+
+	"outputs": [
+
+		{
+
+			"internalType": "uint16",
+
+			"name": "attack",
+
+			"type": "uint16"
+
+		},
+
+		{
+
+			"internalType": "uint16",
+
+			"name": "defense",
+
+			"type": "uint16"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [],
+
+	"name": "name",
+
+	"outputs": [
+
+		{
+
+			"internalType": "string",
+
+			"name": "",
+
+			"type": "string"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [],
+
+	"name": "owner",
+
+	"outputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "",
+
+			"type": "address"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "tokenId",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"name": "ownerOf",
+
+	"outputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "",
+
+			"type": "address"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "enum MiningNFT.Rarity",
+
+			"name": "",
+
+			"type": "uint8"
+
+		}
+
+	],
+
+	"name": "rarityInfo",
+
+	"outputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "miningPower",
+
+			"type": "uint256"
+
+		},
+
+		{
+
+			"internalType": "string",
+
+			"name": "folderName",
+
+			"type": "string"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [],
+
+	"name": "renounceOwnership",
+
+	"outputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "from",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"internalType": "address",
+
+			"name": "to",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "tokenId",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"name": "safeTransferFrom",
+
+	"outputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "from",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"internalType": "address",
+
+			"name": "to",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "tokenId",
+
+			"type": "uint256"
+
+		},
+
+		{
+
+			"internalType": "bytes",
+
+			"name": "_data",
+
+			"type": "bytes"
+
+		}
+
+	],
+
+	"name": "safeTransferFrom",
+
+	"outputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "operator",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"internalType": "bool",
+
+			"name": "approved",
+
+			"type": "bool"
+
+		}
+
+	],
+
+	"name": "setApprovalForAll",
+
+	"outputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "string",
+
+			"name": "newBaseURI",
+
+			"type": "string"
+
+		}
+
+	],
+
+	"name": "setBaseURI",
+
+	"outputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "enum MiningNFT.Rarity",
+
+			"name": "_rarity",
+
+			"type": "uint8"
+
+		},
+
+		{
+
+			"internalType": "uint16",
+
+			"name": "_modelId",
+
+			"type": "uint16"
+
+		},
+
+		{
+
+			"internalType": "uint16",
+
+			"name": "_attack",
+
+			"type": "uint16"
+
+		},
+
+		{
+
+			"internalType": "uint16",
+
+			"name": "_defense",
+
+			"type": "uint16"
+
+		}
+
+	],
+
+	"name": "setModelStats",
+
+	"outputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "enum MiningNFT.Rarity",
+
+			"name": "_rarity",
+
+			"type": "uint8"
+
+		},
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "_power",
+
+			"type": "uint256"
+
+		},
+
+		{
+
+			"internalType": "string",
+
+			"name": "_folderName",
+
+			"type": "string"
+
+		}
+
+	],
+
+	"name": "setRarityInfo",
+
+	"outputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "bytes4",
+
+			"name": "interfaceId",
+
+			"type": "bytes4"
+
+		}
+
+	],
+
+	"name": "supportsInterface",
+
+	"outputs": [
+
+		{
+
+			"internalType": "bool",
+
+			"name": "",
+
+			"type": "bool"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [],
+
+	"name": "symbol",
+
+	"outputs": [
+
+		{
+
+			"internalType": "string",
+
+			"name": "",
+
+			"type": "string"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "index",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"name": "tokenByIndex",
+
+	"outputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"name": "tokenInfo",
+
+	"outputs": [
+
+		{
+
+			"internalType": "enum MiningNFT.Rarity",
+
+			"name": "rarity",
+
+			"type": "uint8"
+
+		},
+
+		{
+
+			"internalType": "uint16",
+
+			"name": "modelId",
+
+			"type": "uint16"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "owner",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "index",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"name": "tokenOfOwnerByIndex",
+
+	"outputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "tokenId",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"name": "tokenURI",
+
+	"outputs": [
+
+		{
+
+			"internalType": "string",
+
+			"name": "",
+
+			"type": "string"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [],
+
+	"name": "totalSupply",
+
+	"outputs": [
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"stateMutability": "view",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "from",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"internalType": "address",
+
+			"name": "to",
+
+			"type": "address"
+
+		},
+
+		{
+
+			"internalType": "uint256",
+
+			"name": "tokenId",
+
+			"type": "uint256"
+
+		}
+
+	],
+
+	"name": "transferFrom",
+
+	"outputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+},
+
+{
+
+	"inputs": [
+
+		{
+
+			"internalType": "address",
+
+			"name": "newOwner",
+
+			"type": "address"
+
+		}
+
+	],
+
+	"name": "transferOwnership",
+
+	"outputs": [],
+
+	"stateMutability": "nonpayable",
+
+	"type": "function"
+
+}
+
+],
+    // --- ELEMENTOS DEL DOM ---
+    const connectBtn = document.getElementById('connect-wallet');
+    const statusText = document.getElementById('status-text');
+    const networkNameEl = document.getElementById('network-name');
+    const walletAddressEl = document.getElementById('wallet-address');
+    const txLog = document.getElementById('tx-log');
+    const allButtons = document.querySelectorAll('button:not(#connect-wallet)');
+
+    // --- ESTADO DE LA APLICACIÓN ---
+    let provider;
+    let signer;
+    let userWallet = null;
+    let miningNftContract;
+
+    // --- FUNCIONES DE UTILIDAD ---
+    function log(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      txLog.innerHTML = `<div><span class="text-gray-500">${timestamp}:</span> ${message}</div>` + txLog.innerHTML;
+    }
+
+    function setButtonsDisabled(disabled, buttonId = null) {
+        if (buttonId) {
+            const button = document.getElementById(buttonId);
+            button.disabled = disabled;
+            if (disabled) {
+                button.innerHTML = `<span class="loader"></span> Procesando...`;
+            } else {
+                // El texto se restaura en la función handleTransaction
+            }
+        } else {
+            allButtons.forEach(btn => btn.disabled = disabled);
+        }
+    }
+
+    // --- LÓGICA WEB3 ---
+    async function connectWallet() {
+      if (typeof window.ethereum === 'undefined') {
+        log('❌ Error: MetaMask no está instalado. Por favor, instala la extensión.');
+        return;
+      }
+
+      if (miningNftABI.length === 0) {
+        log('❌ Error: El ABI del contrato no ha sido configurado en el script. Por favor, edita el archivo HTML.');
+        return;
+      }
+
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        userWallet = await signer.getAddress();
+        
+        const network = await provider.getNetwork();
+        networkNameEl.textContent = `${network.name} (ChainID: ${network.chainId})`;
+        
+        statusText.textContent = 'Conectado';
+        statusText.className = 'font-mono text-green-500';
+        walletAddressEl.textContent = userWallet;
+        connectBtn.textContent = 'Billetera Conectada';
+        connectBtn.disabled = true;
+        
+        miningNftContract = new ethers.Contract(NFT_CONTRACT_ADDRESS, miningNftABI, signer);
+
+        // Verificar si el conectado es el dueño del contrato
+        const owner = await miningNftContract.owner();
+        if (userWallet.toLowerCase() !== owner.toLowerCase()) {
+            log(`⚠️ Advertencia: La billetera conectada (${userWallet}) no es la dueña del contrato (${owner}). Las transacciones probablemente fallarán.`);
+            statusText.className = 'font-mono text-yellow-500';
+            statusText.textContent = 'Conectado (No es Dueño)';
+        }
+
+        allButtons.forEach(btn => btn.disabled = false);
+        log(`✅ Billetera conectada: ${userWallet}`);
+
+      } catch (e) {
+        log(`❌ Error al conectar: ${e.message}`);
+      }
+    }
+
+    async function handleTransaction(buttonId, functionName, args, description) {
+      if (!signer || !miningNftContract) {
+        log('❌ Error: Billetera no conectada o contrato no inicializado.');
+        return;
+      }
+      
+      const button = document.getElementById(buttonId);
+      const originalButtonText = button.textContent;
+      setButtonsDisabled(true, buttonId);
+      log(`⏳ Enviando transacción: ${description}...`);
+
+      try {
+        const tx = await miningNftContract[functionName](...args);
+        log(`📤 Tx enviada: ${tx.hash}. Esperando confirmación...`);
+        
+        const receipt = await tx.wait();
+        const explorerUrl = `https://etherscan.io/tx/${receipt.transactionHash}`; // Cambiar si es otra red
+        log(`✅ ¡Éxito! Confirmada: <a href="${explorerUrl}" target="_blank" class="text-blue-400 hover:underline">${receipt.transactionHash}</a>`);
+
+      } catch (e) {
+        const errorMessage = e.reason || e.message || "Error desconocido.";
+        log(`❌ Error en la transacción: ${errorMessage}`);
+      } finally {
+        button.innerHTML = originalButtonText;
+        setButtonsDisabled(false, buttonId);
+        allButtons.forEach(btn => btn.disabled = false); // Reactivar todos los botones
+      }
+    }
+
+    // --- EVENT LISTENERS ---
+    connectBtn.addEventListener('click', connectWallet);
+
+    if (window.ethereum) {
+        window.ethereum.on('accountsChanged', (accounts) => {
+            log('🔄 Cambio de cuenta detectado. Por favor, vuelve a conectar.');
+            location.reload();
+        });
+        window.ethereum.on('chainChanged', (chainId) => {
+            log('🔄 Cambio de red detectado. Recargando la página...');
+            location.reload();
+        });
+    }
+
+    document.getElementById('setBaseURI-btn').addEventListener('click', () => {
+      const uri = document.getElementById('baseURI-input').value;
+      if (!uri) return log('❌ Error: La Base URI no puede estar vacía.');
+      handleTransaction('setBaseURI-btn', 'setBaseURI', [uri], 'Configurando Base URI');
+    });
+
+    document.getElementById('setRarityInfo-btn').addEventListener('click', () => {
+      const rarity = parseInt(document.getElementById('rarity-select').value);
+      const power = document.getElementById('power-input').value;
+      const folder = document.getElementById('folder-input').value;
+      if (!power || !folder) return log('❌ Error: Poder y Carpeta son requeridos.');
+      handleTransaction('setRarityInfo-btn', 'setRarityInfo', [rarity, ethers.BigNumber.from(power), folder], `Configurando Rareza ${rarity}`);
+    });
+
+    document.getElementById('setModelStats-btn').addEventListener('click', () => {
+      const rarity = parseInt(document.getElementById('stats-rarity-select').value);
+      const modelId = document.getElementById('modelId-input').value;
+      const attack = document.getElementById('attack-input').value;
+      const defense = document.getElementById('defense-input').value;
+      if (!modelId || !attack || !defense) return log('❌ Error: Todos los campos de stats son requeridos.');
+      handleTransaction('setModelStats-btn', 'setModelStats', [rarity, modelId, attack, defense], `Configurando Stats para Modelo ${modelId}`);
+    });
+  </script>
+</body>
+</html>
