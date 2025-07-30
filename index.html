@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Panel - Destinity World (Real)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="text/javascript"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
     body { background-color: #0d1117; color: #e6edf3; font-family: 'Inter', sans-serif; }
@@ -116,172 +116,173 @@
   </div>
 
   <script>
-    // --- CONFIGURACIÓN DEL CONTRATO ---
-    const NFT_CONTRACT_ADDRESS = '0x753c98de93F536611bfF03E8381A8A24D8FFE1b5';
-    
-    // ABI DEL CONTRATO (INTEGRADO)
-    const miningNftABI = [ { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "approved", "type": "address" }, { "indexed": true, "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "operator", "type": "address" }, { "indexed": false, "internalType": "bool", "name": "approved", "type": "bool" } ], "name": "ApprovalForAll", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" } ], "name": "OwnershipTransferred", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": true, "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "Transfer", "type": "event" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "approve", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "baseURI", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "claimFreeNFT", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "getApproved", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "user", "type": "address" } ], "name": "getMiningPower", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256[5]", "name": "_tokenIds", "type": "uint256[5]" } ], "name": "getTeamPower", "outputs": [ { "internalType": "uint256", "name": "totalAttack", "type": "uint256" }, { "internalType": "uint256", "name": "totalDefense", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "", "type": "address" } ], "name": "hasClaimedFreeNFT", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "operator", "type": "address" } ], "name": "isApprovedForAll", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "enum MiningNFT.Rarity", "name": "_rarity", "type": "uint8" }, { "internalType": "uint16", "name": "_modelId", "type": "uint16" } ], "name": "mintNFT", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "enum MiningNFT.Rarity", "name": "", "type": "uint8" }, { "internalType": "uint16", "name": "", "type": "uint16" } ], "name": "modelStats", "outputs": [ { "internalType": "uint16", "name": "attack", "type": "uint16" }, { "internalType": "uint16", "name": "defense", "type": "uint16" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "name", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "owner", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "ownerOf", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "enum MiningNFT.Rarity", "name": "", "type": "uint8" } ], "name": "rarityInfo", "outputs": [ { "internalType": "uint256", "name": "miningPower", "type": "uint256" }, { "internalType": "string", "name": "folderName", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "safeTransferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" }, { "internalType": "bytes", "name": "_data", "type": "bytes" } ], "name": "safeTransferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "operator", "type": "address" }, { "internalType": "bool", "name": "approved", "type": "bool" } ], "name": "setApprovalForAll", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "newBaseURI", "type": "string" } ], "name": "setBaseURI", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "enum MiningNFT.Rarity", "name": "_rarity", "type": "uint8" }, { "internalType": "uint16", "name": "_modelId", "type": "uint16" }, { "internalType": "uint16", "name": "_attack", "type": "uint16" }, { "internalType": "uint16", "name": "_defense", "type": "uint16" } ], "name": "setModelStats", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "enum MiningNFT.Rarity", "name": "_rarity", "type": "uint8" }, { "internalType": "uint256", "name": "_power", "type": "uint256" }, { "internalType": "string", "name": "_folderName", "type": "string" } ], "name": "setRarityInfo", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" } ], "name": "supportsInterface", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "symbol", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "index", "type": "uint256" } ], "name": "tokenByIndex", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "name": "tokenInfo", "outputs": [ { "internalType": "enum MiningNFT.Rarity", "name": "rarity", "type": "uint8" }, { "internalType": "uint16", "name": "modelId", "type": "uint16" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "uint256", "name": "index", "type": "uint256" } ], "name": "tokenOfOwnerByIndex", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "tokenURI", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "transferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "newOwner", "type": "address" } ], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" } ];
-
-    // --- ELEMENTOS DEL DOM ---
-    const connectBtn = document.getElementById('connect-wallet');
-    const statusText = document.getElementById('status-text');
-    const networkNameEl = document.getElementById('network-name');
-    const walletAddressEl = document.getElementById('wallet-address');
-    const txLog = document.getElementById('tx-log');
-    const allButtons = document.querySelectorAll('button:not(#connect-wallet)');
-    const connectionCard = document.getElementById('connection-card');
-
-    // --- ESTADO DE LA APLICACIÓN ---
-    let provider;
-    let signer;
-    let userWallet = null;
-    let miningNftContract;
-
-    // --- FUNCIONES DE UTILIDAD ---
-    function log(message, isError = false) {
-      const timestamp = new Date().toLocaleTimeString();
-      const logEntry = document.createElement('div');
-      logEntry.innerHTML = `<span class="text-gray-500">${timestamp}:</span> ${message}`;
-      if (isError) {
-          logEntry.classList.add('text-red-400', 'font-semibold');
-          txLog.classList.add('border-red-500', 'border-2');
-          setTimeout(() => {
-              txLog.classList.remove('border-red-500', 'border-2');
-          }, 4000);
-      }
-      txLog.prepend(logEntry);
-    }
-
-    function setButtonsDisabled(disabled, buttonId = null) {
-        if (buttonId) {
-            const button = document.getElementById(buttonId);
-            button.disabled = disabled;
-            if (disabled) {
-                button.innerHTML = `<span class="loader"></span> Procesando...`;
-            }
-        } else {
-            allButtons.forEach(btn => btn.disabled = disabled);
-        }
-    }
-       // --- LÓGICA WEB3 ---
-    async function connectWallet() {
-      // 1. Comprobar si el ABI está presente. Es el error más común.
-      if (miningNftABI.length === 0) {
-        const errorMessage = '❌ Error Crítico: El ABI del contrato no ha sido configurado en el script. Debes pegar el ABI en la variable `miningNftABI` para que el panel funcione.';
-        log(errorMessage, true);
-        connectionCard.classList.add('animate-shake');
-        setTimeout(()=> connectionCard.classList.remove('animate-shake'), 820);
-        return;
-      }
-
-      // 2. Comprobar si existe una billetera (ej. MetaMask).
-      if (typeof window.ethereum === 'undefined') {
-        const errorMessage = '❌ Error: No se detecta una billetera Web3 (como MetaMask). Si estás en un móvil, asegúrate de usar el navegador de la app de MetaMask.';
-        log(errorMessage, true);
-        connectionCard.classList.add('animate-shake');
-        setTimeout(()=> connectionCard.classList.remove('animate-shake'), 820);
-        return;
-      }
-
-      try {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
-        userWallet = await signer.getAddress();
-        
-        const network = await provider.getNetwork();
-        networkNameEl.textContent = `${network.name} (ChainID: ${network.chainId})`;
-        
-        statusText.textContent = 'Conectado';
-        statusText.className = 'font-mono text-green-500';
-        walletAddressEl.textContent = userWallet;
-        connectBtn.textContent = 'Billetera Conectada';
-        connectBtn.disabled = true;
-        
-        miningNftContract = new ethers.Contract(NFT_CONTRACT_ADDRESS, miningNftABI, signer);
-
-        const owner = await miningNftContract.owner();
-        if (userWallet.toLowerCase() !== owner.toLowerCase()) {
-            log(`⚠️ Advertencia: La billetera conectada no es la dueña del contrato. Las transacciones probablemente fallarán.`, true);
-            statusText.className = 'font-mono text-yellow-500';
-            statusText.textContent = 'Conectado (No es Dueño)';
-        }
-
-        allButtons.forEach(btn => btn.disabled = false);
-        log(`✅ Billetera conectada: ${userWallet}`);
-
-      } catch (e) {
-        log(`❌ Error al conectar: ${e.message}`, true);
-      }
-    }
-
-    async function handleTransaction(buttonId, functionName, args, description) {
-      if (!signer || !miningNftContract) {
-        log('❌ Error: Billetera no conectada o contrato no inicializado.', true);
-        return;
-      }
+    // Se envuelve todo el script en un listener que espera a que el DOM esté completamente cargado.
+    // Esto soluciona el error "ethers is not defined" asegurando que la librería externa
+    // se haya cargado antes de que nuestro código intente usarla.
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- CONFIGURACIÓN DEL CONTRATO ---
+      const NFT_CONTRACT_ADDRESS = '0x753c98de93F536611bfF03E8381A8A24D8FFE1b5';
       
-      const button = document.getElementById(buttonId);
-      const originalButtonText = button.textContent;
-      setButtonsDisabled(true, buttonId);
-      log(`⏳ Enviando transacción: ${description}...`);
+      // ABI DEL CONTRATO (INTEGRADO)
+      const miningNftABI = [ { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "approved", "type": "address" }, { "indexed": true, "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "operator", "type": "address" }, { "indexed": false, "internalType": "bool", "name": "approved", "type": "bool" } ], "name": "ApprovalForAll", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" } ], "name": "OwnershipTransferred", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": true, "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "Transfer", "type": "event" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "approve", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "baseURI", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "claimFreeNFT", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "getApproved", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "user", "type": "address" } ], "name": "getMiningPower", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256[5]", "name": "_tokenIds", "type": "uint256[5]" } ], "name": "getTeamPower", "outputs": [ { "internalType": "uint256", "name": "totalAttack", "type": "uint256" }, { "internalType": "uint256", "name": "totalDefense", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "", "type": "address" } ], "name": "hasClaimedFreeNFT", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "operator", "type": "address" } ], "name": "isApprovedForAll", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "enum MiningNFT.Rarity", "name": "_rarity", "type": "uint8" }, { "internalType": "uint16", "name": "_modelId", "type": "uint16" } ], "name": "mintNFT", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "enum MiningNFT.Rarity", "name": "", "type": "uint8" }, { "internalType": "uint16", "name": "", "type": "uint16" } ], "name": "modelStats", "outputs": [ { "internalType": "uint16", "name": "attack", "type": "uint16" }, { "internalType": "uint16", "name": "defense", "type": "uint16" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "name", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "owner", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "ownerOf", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "enum MiningNFT.Rarity", "name": "", "type": "uint8" } ], "name": "rarityInfo", "outputs": [ { "internalType": "uint256", "name": "miningPower", "type": "uint256" }, { "internalType": "string", "name": "folderName", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "safeTransferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" }, { "internalType": "bytes", "name": "_data", "type": "bytes" } ], "name": "safeTransferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "operator", "type": "address" }, { "internalType": "bool", "name": "approved", "type": "bool" } ], "name": "setApprovalForAll", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "newBaseURI", "type": "string" } ], "name": "setBaseURI", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "enum MiningNFT.Rarity", "name": "_rarity", "type": "uint8" }, { "internalType": "uint16", "name": "_modelId", "type": "uint16" }, { "internalType": "uint16", "name": "_attack", "type": "uint16" }, { "internalType": "uint16", "name": "_defense", "type": "uint16" } ], "name": "setModelStats", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "enum MiningNFT.Rarity", "name": "_rarity", "type": "uint8" }, { "internalType": "uint256", "name": "_power", "type": "uint256" }, { "internalType": "string", "name": "_folderName", "type": "string" } ], "name": "setRarityInfo", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" } ], "name": "supportsInterface", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "symbol", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "index", "type": "uint256" } ], "name": "tokenByIndex", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "name": "tokenInfo", "outputs": [ { "internalType": "enum MiningNFT.Rarity", "name": "rarity", "type": "uint8" }, { "internalType": "uint16", "name": "modelId", "type": "uint16" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "uint256", "name": "index", "type": "uint256" } ], "name": "tokenOfOwnerByIndex", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "tokenURI", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "transferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "newOwner", "type": "address" } ], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" } ];
 
-      try {
-        const tx = await miningNftContract[functionName](...args);
-        log(`📤 Tx enviada: ${tx.hash}. Esperando confirmación...`);
-        
-        const receipt = await tx.wait();
-        const explorerUrl = `https://etherscan.io/tx/${receipt.transactionHash}`; // Cambiar si es otra red
-        log(`✅ ¡Éxito! Confirmada: <a href="${explorerUrl}" target="_blank" class="text-blue-400 hover:underline">${receipt.transactionHash}</a>`);
+      // --- ELEMENTOS DEL DOM ---
+      const connectBtn = document.getElementById('connect-wallet');
+      const statusText = document.getElementById('status-text');
+      const networkNameEl = document.getElementById('network-name');
+      const walletAddressEl = document.getElementById('wallet-address');
+      const txLog = document.getElementById('tx-log');
+      const allButtons = document.querySelectorAll('button:not(#connect-wallet)');
+      const connectionCard = document.getElementById('connection-card');
 
-      } catch (e) {
-        const errorMessage = e.reason || e.data?.message || e.message || "Error desconocido.";
-        log(`❌ Error en la transacción: ${errorMessage}`, true);
-      } finally {
-        button.innerHTML = originalButtonText;
-        setButtonsDisabled(false, buttonId);
-        allButtons.forEach(btn => btn.disabled = false);
+      // --- ESTADO DE LA APLICACIÓN ---
+      let provider;
+      let signer;
+      let userWallet = null;
+      let miningNftContract;
+
+      // --- FUNCIONES DE UTILIDAD ---
+      function log(message, isError = false) {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.innerHTML = `<span class="text-gray-500">${timestamp}:</span> ${message}`;
+        if (isError) {
+            logEntry.classList.add('text-red-400', 'font-semibold');
+            txLog.classList.add('border-red-500', 'border-2');
+            setTimeout(() => {
+                txLog.classList.remove('border-red-500', 'border-2');
+            }, 4000);
+        }
+        txLog.prepend(logEntry);
       }
-    }
 
-    // --- EVENT LISTENERS ---
-    connectBtn.addEventListener('click', connectWallet);
+      function setButtonsDisabled(disabled, buttonId = null) {
+          if (buttonId) {
+              const button = document.getElementById(buttonId);
+              button.disabled = disabled;
+              if (disabled) {
+                  button.innerHTML = `<span class="loader"></span> Procesando...`;
+              }
+          } else {
+              allButtons.forEach(btn => btn.disabled = disabled);
+          }
+      }
+      // --- LÓGICA WEB3 ---
+      async function connectWallet() {
+        if (typeof window.ethers === 'undefined') {
+            const errorMessage = '❌ Error: La librería Ethers.js no se cargó correctamente. Por favor, recarga la página.';
+            log(errorMessage, true);
+            connectionCard.classList.add('animate-shake');
+            setTimeout(()=> connectionCard.classList.remove('animate-shake'), 820);
+            return;
+        }
 
-    if (window.ethereum) {
-        window.ethereum.on('accountsChanged', (accounts) => {
-            log('🔄 Cambio de cuenta detectado. Recargando la página...');
-            location.reload();
-        });
-        window.ethereum.on('chainChanged', (chainId) => {
-            log('🔄 Cambio de red detectado. Recargando la página...');
-            location.reload();
-        });
-    }
+        if (typeof window.ethereum === 'undefined') {
+          const errorMessage = '❌ Error: No se detecta una billetera Web3 (como MetaMask). Si estás en un móvil, asegúrate de usar el navegador de la app de MetaMask.';
+          log(errorMessage, true);
+          connectionCard.classList.add('animate-shake');
+          setTimeout(()=> connectionCard.classList.remove('animate-shake'), 820);
+          return;
+        }
 
-    document.getElementById('setBaseURI-btn').addEventListener('click', () => {
-      const uri = document.getElementById('baseURI-input').value;
-      if (!uri) return log('❌ Error: La Base URI no puede estar vacía.', true);
-      handleTransaction('setBaseURI-btn', 'setBaseURI', [uri], 'Configurando Base URI');
-    });
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          provider = new window.ethers.providers.Web3Provider(window.ethereum);
+          signer = provider.getSigner();
+          userWallet = await signer.getAddress();
+          
+          const network = await provider.getNetwork();
+          networkNameEl.textContent = `${network.name} (ChainID: ${network.chainId})`;
+          
+          statusText.textContent = 'Conectado';
+          statusText.className = 'font-mono text-green-500';
+          walletAddressEl.textContent = userWallet;
+          connectBtn.textContent = 'Billetera Conectada';
+          connectBtn.disabled = true;
+          
+          miningNftContract = new window.ethers.Contract(NFT_CONTRACT_ADDRESS, miningNftABI, signer);
 
-    document.getElementById('setRarityInfo-btn').addEventListener('click', () => {
-      const rarity = parseInt(document.getElementById('rarity-select').value);
-      const power = document.getElementById('power-input').value;
-      const folder = document.getElementById('folder-input').value;
-      if (!power || !folder) return log('❌ Error: Poder y Carpeta son requeridos.', true);
-      handleTransaction('setRarityInfo-btn', 'setRarityInfo', [rarity, ethers.BigNumber.from(power), folder], `Configurando Rareza ${rarity}`);
-    });
+          const owner = await miningNftContract.owner();
+          if (userWallet.toLowerCase() !== owner.toLowerCase()) {
+              log(`⚠️ Advertencia: La billetera conectada no es la dueña del contrato. Las transacciones probablemente fallarán.`, true);
+              statusText.className = 'font-mono text-yellow-500';
+              statusText.textContent = 'Conectado (No es Dueño)';
+          }
 
-    document.getElementById('setModelStats-btn').addEventListener('click', () => {
-      const rarity = parseInt(document.getElementById('stats-rarity-select').value);
-      const modelId = document.getElementById('modelId-input').value;
-      const attack = document.getElementById('attack-input').value;
-      const defense = document.getElementById('defense-input').value;
-      if (!modelId || !attack || !defense) return log('❌ Error: Todos los campos de stats son requeridos.', true);
-      handleTransaction('setModelStats-btn', 'setModelStats', [rarity, modelId, attack, defense], `Configurando Stats para Modelo ${modelId}`);
+          allButtons.forEach(btn => btn.disabled = false);
+          log(`✅ Billetera conectada: ${userWallet}`);
+
+        } catch (e) {
+          log(`❌ Error al conectar: ${e.message}`, true);
+        }
+      }
+
+      async function handleTransaction(buttonId, functionName, args, description) {
+        if (!signer || !miningNftContract) {
+          log('❌ Error: Billetera no conectada o contrato no inicializado.', true);
+          return;
+        }
+        
+        const button = document.getElementById(buttonId);
+        const originalButtonText = button.textContent;
+        setButtonsDisabled(true, buttonId);
+        log(`⏳ Enviando transacción: ${description}...`);
+
+        try {
+          const tx = await miningNftContract[functionName](...args);
+          log(`📤 Tx enviada: ${tx.hash}. Esperando confirmación...`);
+          
+          const receipt = await tx.wait();
+          const explorerUrl = `https://etherscan.io/tx/${receipt.transactionHash}`; // Cambiar si es otra red
+          log(`✅ ¡Éxito! Confirmada: <a href="${explorerUrl}" target="_blank" class="text-blue-400 hover:underline">${receipt.transactionHash}</a>`);
+
+        } catch (e) {
+          const errorMessage = e.reason || e.data?.message || e.message || "Error desconocido.";
+          log(`❌ Error en la transacción: ${errorMessage}`, true);
+        } finally {
+          button.innerHTML = originalButtonText;
+          setButtonsDisabled(false, buttonId);
+          allButtons.forEach(btn => btn.disabled = false);
+        }
+      }
+
+      // --- EVENT LISTENERS ---
+      connectBtn.addEventListener('click', connectWallet);
+
+      if (window.ethereum) {
+          window.ethereum.on('accountsChanged', (accounts) => {
+              log('🔄 Cambio de cuenta detectado. Recargando la página...');
+              location.reload();
+          });
+          window.ethereum.on('chainChanged', (chainId) => {
+              log('🔄 Cambio de red detectado. Recargando la página...');
+              location.reload();
+          });
+      }
+
+      document.getElementById('setBaseURI-btn').addEventListener('click', () => {
+        const uri = document.getElementById('baseURI-input').value;
+        if (!uri) return log('❌ Error: La Base URI no puede estar vacía.', true);
+        handleTransaction('setBaseURI-btn', 'setBaseURI', [uri], 'Configurando Base URI');
+      });
+
+      document.getElementById('setRarityInfo-btn').addEventListener('click', () => {
+        const rarity = parseInt(document.getElementById('rarity-select').value);
+        const power = document.getElementById('power-input').value;
+        const folder = document.getElementById('folder-input').value;
+        if (!power || !folder) return log('❌ Error: Poder y Carpeta son requeridos.', true);
+        handleTransaction('setRarityInfo-btn', 'setRarityInfo', [rarity, window.ethers.BigNumber.from(power), folder], `Configurando Rareza ${rarity}`);
+      });
+
+      document.getElementById('setModelStats-btn').addEventListener('click', () => {
+        const rarity = parseInt(document.getElementById('stats-rarity-select').value);
+        const modelId = document.getElementById('modelId-input').value;
+        const attack = document.getElementById('attack-input').value;
+        const defense = document.getElementById('defense-input').value;
+        if (!modelId || !attack || !defense) return log('❌ Error: Todos los campos de stats son requeridos.', true);
+        handleTransaction('setModelStats-btn', 'setModelStats', [rarity, modelId, attack, defense], `Configurando Stats para Modelo ${modelId}`);
+      });
     });
   </script>
 </body>
-</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
-
-    
+</html>
