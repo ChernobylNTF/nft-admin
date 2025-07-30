@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Panel</title>
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+</head>
+<body>
+  <h1>Panel Admin NFT</h1>
+  <button id="connectBtn">Conectar Wallet</button><br/>
+  <p id="walletAddressEl"></p>
+
+  <h2>Funciones</h2>
+  <div>
+    <input id="uriInput" placeholder="Nuevo baseURI"/>
+    <button onclick="handleTransaction('setBaseURI', [document.getElementById('uriInput').value], 'Set Base URI')">Set Base URI</button>
+  </div>
+  <div>
+    <input id="rarityRarity" placeholder="Rarity"/>
+    <input id="rarityPower" placeholder="Power"/>
+    <input id="rarityFolder" placeholder="Folder"/>
+    <button onclick="handleTransaction('setRarityInfo', [Number(rarityRarity.value), rarityPower.value, rarityFolder.value], 'Set Rarity Info')">Set Rarity Info</button>
+  </div>
+  <div>
+    <input id="modelRarity" placeholder="Rarity"/>
+    <input id="modelId" placeholder="Model ID"/>
+    <input id="modelAtk" placeholder="Attack"/>
+    <input id="modelDef" placeholder="Defense"/>
+    <button onclick="handleTransaction('setModelStats', [Number(modelRarity.value), modelId.value, modelAtk.value, modelDef.value], 'Set Model Stats')">Set Model Stats</button>
+  </div>
+
+  <pre id="log"></pre>
+
+  <script>
+    const NFT_CONTRACT_ADDRESS = "0x753c98de93F536611bfF03E8381A8A24D8FFE1b5";
+    const miningNftABI = [
+      {
+        "inputs": [],
+        "name": "claimFreeNFT",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "name": "hasClaimedFreeNFT",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [{ "internalType": "string", "name": "uri", "type": "string" }],
+        "name": "setBaseURI",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          { "internalType": "uint8", "name": "rarity", "type": "uint8" },
+          { "internalType": "uint256", "name": "power", "type": "uint256" },
+          { "internalType": "string", "name": "folder", "type": "string" }
+        ],
+        "name": "setRarityInfo",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          { "internalType": "uint8", "name": "rarity", "type": "uint8" },
+          { "internalType": "uint256", "name": "modelId", "type": "uint256" },
+          { "internalType": "uint256", "name": "attack", "type": "uint256" },
+          { "internalType": "uint256", "name": "defense", "type": "uint256" }
+        ],
+        "name": "setModelStats",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ];
+
+    const log = (msg) => document.getElementById("log").textContent += msg + "\n";
+    const walletAddressEl = document.getElementById("walletAddressEl");
+    const connectBtn = document.getElementById("connectBtn");
+    let provider, signer, userWallet;
+
+    connectBtn.addEventListener('click', async () => {
+      if (window.ethereum) {
+        await ethereum.request({ method: 'eth_requestAccounts' });
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        userWallet = await signer.getAddress();
+        walletAddressEl.textContent = 'Conectado: ' + userWallet;
+      } else {
+        log('Metamask no detectado');
+      }
+    });
+
+    async function handleTransaction(functionName, args, description) {
+      if (!signer) return log('Conectá la wallet primero.');
+      try {
+        log(`Ejecutando: ${description}`);
+        const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, miningNftABI, signer);
+        const tx = await contract[functionName](...args);
+        log(`Tx enviada: ${tx.hash}`);
+        await tx.wait();
+        log('✅ Confirmada');
+      } catch (e) {
+        log('❌ Error: ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>
