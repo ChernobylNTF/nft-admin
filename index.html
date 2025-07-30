@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Panel - Destinity World (Carga Inteligente)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/viem/dist/viem.iife.js" defer></script>
+  <!-- CAMBIO: Se usa un CDN alternativo (jsDelivr) para mejorar la fiabilidad de la carga del script. -->
+  <script src="https://cdn.jsdelivr.net/npm/viem/dist/viem.iife.js" defer></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
     body { background-color: #0d1117; color: #e6edf3; font-family: 'Inter', sans-serif; }
@@ -116,7 +117,6 @@
   </div>
 
   <script>
-    // Se envuelve todo en un listener para asegurar que el HTML base esté listo.
     document.addEventListener('DOMContentLoaded', () => {
       // --- CONFIGURACIÓN DEL CONTRATO ---
       const NFT_CONTRACT_ADDRESS = '0x753c98de93F536611bfF03E8381A8A24D8FFE1b5';
@@ -162,7 +162,7 @@
               allButtons.forEach(btn => btn.disabled = disabled);
           }
       }
-      // --- LÓGICA WEB3 (VIEM) ---
+       // --- LÓGICA WEB3 (VIEM) ---
       async function connectWallet() {
         try {
           walletClient = viem.createWalletClient({ transport: viem.custom(window.ethereum) });
@@ -244,17 +244,14 @@
         const maxRetries = 25; // Intentar por 5 segundos (25 * 200ms)
 
         function check() {
-            // Verificar si las librerías necesarias están listas
             if (typeof window.viem !== 'undefined' && typeof window.ethereum !== 'undefined') {
                 log("✅ Dependencias listas. Panel operativo.");
                 setupEventListeners();
             } else {
                 retries++;
                 if (retries < maxRetries) {
-                    // Si no están listas, volver a intentar en 200ms
                     setTimeout(check, 200);
                 } else {
-                    // Si se superan los reintentos, mostrar un error final
                     log("❌ Error crítico: No se pudieron cargar las dependencias (Viem o MetaMask) después de 5 segundos. Por favor, verifica tu conexión y recarga la página.", true);
                     if (typeof window.viem === 'undefined') {
                         log("Detalle: La librería Viem.js no se cargó.", true);
@@ -306,7 +303,6 @@
         });
       }
 
-      // Iniciar la aplicación
       log("Panel inicializado. Esperando dependencias...");
       initializeApp();
     });
